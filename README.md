@@ -2,6 +2,16 @@
 
 A modern, GPU-accelerated Python port of **Lingdong Huang's** acclaimed procedural Chinese landscape generation system, implemented in **py5** (Processing for Python) with OpenGL P2D hardware acceleration, retained `PShape` VBO caching, and custom GLSL post-processing shaders.
 
+
+---
+
+## Example Gallery
+
+| Example 1: Misty River & Sampan Fishermen | Example 2: Summit Pagoda & Valley Vista |
+|:---:|:---:|
+| ![Shan Shui - Misty River & Sampan Fishermen](examples/shanshui_rice_paper.png) | ![Shan Shui - Summit Pagoda & Valley Vista](examples/shanshui_ink_mountains.png) |
+| *Procedural ink wash mountains, cinnabar sun, sampan fishermen, and rice paper fiber bleed* | *Summit Buddhist pagoda, mountainside pavilion, soaring crane flock, and river gorge* |
+
 ---
 
 ## 1. Provenance & Original Repository Reference
@@ -20,8 +30,11 @@ The original 4,360+ line monolithic JavaScript file (`index.html`) has been syst
 
 ```
 ShanShuiPy5/
-├── .idea/                      # PyCharm project workspace metadata
-├── shanshui/                   # Core Python package
+├── .idea/                        # PyCharm project workspace metadata
+├── examples/                     # Rendered artwork examples
+│   ├── shanshui_rice_paper.png   # Misty river & sampan fishermen on rice paper
+│   └── shanshui_ink_mountains.png# Mountain peaks with summit pagoda & valley vista
+├── shanshui/                     # Core Python package
 │   ├── __init__.py             # Package exports and public API
 │   ├── main.py                 # Py5 loop, camera scrolling, GPU layer orchestration & HUD
 │   ├── utils.py                # PRNG, 3D Perlin noise, PolyTools, brush stroke ribbon generator
