@@ -117,15 +117,15 @@ def calligraphy_seal(x: float, y: float, size: float = 48.0,
                      style: str = "yin") -> List[PolyPrimitive]:
     """
     Traditional Chinese carved seal / chop stamp (*yinzhang* 印章).
-    Renders weathered cinnabar vermilion ink with seal-script glyphs.
+    Renders weathered cinnabar vermilion ink with authentic seal-script glyphs
+    for 'Shan Shui' (山水 - Mountain & Water) in Yin (白文) or Yang (朱文) style.
     """
     prims: List[PolyPrimitive] = []
-    # Cinnabar ink color
-    seal_col = (195, 38, 25, 230)
-    white_col = (248, 245, 235, 240)
+    # Cinnabar vermilion ink and parchment white colors
+    seal_col = (195, 38, 25, 235)
+    white_col = (248, 245, 235, 245)
 
     # Outer distressed square border
-    segments = 16
     half = size * 0.5
     corners = [(-half, -half), (half, -half), (half, half), (-half, half)]
     border_pts: List[Tuple[float, float]] = []
@@ -140,38 +140,68 @@ def calligraphy_seal(x: float, y: float, size: float = 48.0,
             border_pts.append((x + pt[0] + jitter, y + pt[1] + jitter))
 
     if style == "yin":
-        # Solid red background with carved white negative characters
-        prims.extend(poly(border_pts, fil=seal_col, str_=seal_col, wid=2.0))
-        # Inner glyph strokes in white
-        inner_scale = size * 0.65
-        ih = inner_scale * 0.5
-        # Stylized seal script maze strokes
-        glyph_lines = [
-            [(-ih * 0.7, -ih * 0.6), (-ih * 0.7, ih * 0.6)],
-            [(-ih * 0.7, 0.0), (-ih * 0.1, 0.0)],
-            [(-ih * 0.1, -ih * 0.6), (-ih * 0.1, ih * 0.6)],
-            [(ih * 0.2, -ih * 0.6), (ih * 0.8, -ih * 0.6)],
-            [(ih * 0.5, -ih * 0.6), (ih * 0.5, ih * 0.6)],
-            [(ih * 0.2, ih * 0.6), (ih * 0.8, ih * 0.6)],
-        ]
-        for gl in glyph_lines:
-            shifted = [(x + p[0], y + p[1]) for p in gl]
-            prims.extend(stroke(shifted, wid=2.5, col=white_col, out=0.0, fun=lambda _: 1.0))
+        # Yin seal (白文): solid red cinnabar background with carved negative characters
+        prims.extend(poly(border_pts, fil=seal_col, str_=seal_col, wid=1.5))
+        glyph_col = white_col
     else:
-        # Yang seal: white background with red positive border and red characters
+        # Yang seal (朱文): open background with red positive border and red characters
         prims.extend(poly(border_pts, fil=(0, 0, 0, 0), str_=seal_col, wid=3.0))
-        inner_scale = size * 0.65
-        ih = inner_scale * 0.5
-        glyph_lines = [
-            [(-ih * 0.6, -ih * 0.6), (-ih * 0.6, ih * 0.6)],
-            [(-ih * 0.6, -ih * 0.1), (-ih * 0.1, -ih * 0.1)],
-            [(-ih * 0.1, -ih * 0.6), (-ih * 0.1, ih * 0.6)],
-            [(ih * 0.3, -ih * 0.5), (ih * 0.7, -ih * 0.5)],
-            [(ih * 0.5, -ih * 0.5), (ih * 0.5, ih * 0.5)],
-            [(ih * 0.3, ih * 0.5), (ih * 0.7, ih * 0.5)],
-        ]
-        for gl in glyph_lines:
-            shifted = [(x + p[0], y + p[1]) for p in gl]
-            prims.extend(stroke(shifted, wid=2.2, col=seal_col, out=0.0, fun=lambda _: 1.0))
+        glyph_col = seal_col
+
+    inner_scale = size * 0.68
+    ih = inner_scale * 0.5
+
+    # Traditional Chinese seal reading order: Right-to-Left
+    # Right column: 山 (Shan - Mountain)
+    # Left column:  水 (Shui - Water)
+
+    # Coordinates for 山 (Shan)
+    cx_s = ih * 0.50
+    lx_s = ih * 0.16
+    rx_s = ih * 0.84
+    y_top_s = -ih * 0.78
+    y_bot_s = ih * 0.78
+    y_prong_s = -ih * 0.35
+
+    # Coordinates for 水 (Shui)
+    cx_w = -ih * 0.50
+    lx_w = -ih * 0.84
+    rx_w = -ih * 0.16
+    y_top_w = -ih * 0.78
+    y_bot_w = ih * 0.78
+
+    glyph_paths: List[List[Tuple[float, float]]] = [
+        # --- 山 (Shan - Mountain) ---
+        # Central tall peak
+        [(cx_s, y_top_s), (cx_s, y_bot_s)],
+        # Left peak with serif curving into base
+        [(lx_s + ih * 0.06, y_prong_s), (lx_s, y_prong_s), (lx_s, y_bot_s)],
+        # Right peak with serif curving into base
+        [(rx_s - ih * 0.06, y_prong_s), (rx_s, y_prong_s), (rx_s, y_bot_s)],
+        # Bottom connecting cradle base
+        [(lx_s, y_bot_s), (rx_s, y_bot_s)],
+
+        # --- 水 (Shui - Water) ---
+        # Sinuous central stream
+        [(cx_w, y_top_w), (cx_w + ih * 0.05, -ih * 0.28), (cx_w - ih * 0.05, ih * 0.28), (cx_w, y_bot_w)],
+        # Upper-left water ripple
+        [(cx_w - ih * 0.08, -ih * 0.18), (lx_w, -ih * 0.18), (lx_w, -ih * 0.70)],
+        # Lower-left water ripple
+        [(cx_w - ih * 0.08, ih * 0.18), (lx_w, ih * 0.18), (lx_w, ih * 0.70)],
+        # Upper-right water ripple
+        [(cx_w + ih * 0.08, -ih * 0.18), (rx_w, -ih * 0.18), (rx_w, -ih * 0.70)],
+        # Lower-right water ripple
+        [(cx_w + ih * 0.08, ih * 0.18), (rx_w, ih * 0.18), (rx_w, ih * 0.70)],
+    ]
+
+    for path in glyph_paths:
+        sub = div(path, 3)
+        jittered: List[Tuple[float, float]] = []
+        for pt in sub:
+            # Subtle stone carving chisel texture (金石气)
+            jx = (noise((x + pt[0]) * 0.4, (y + pt[1]) * 0.4) - 0.5) * 0.5
+            jy = (noise((x + pt[0]) * 0.4 + 5.0, (y + pt[1]) * 0.4 + 5.0) - 0.5) * 0.5
+            jittered.append((x + pt[0] + jx, y + pt[1] + jy))
+        prims.extend(stroke(jittered, wid=1.2, col=glyph_col, out=0.5, noi=0.08, fun=lambda _: 1.0))
 
     return prims

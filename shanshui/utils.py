@@ -565,32 +565,46 @@ def stroke(ptlist: List[Tuple[float, float]],
     if fun is None:
         fun = lambda x: math.sin(x * math.pi)
 
+    # Subdivide 2-point polylines so interior ribbon geometry is generated
+    if len(ptlist) == 2:
+        ptlist = div(ptlist, 4)
+
     color_tuple = parse_color(col)
     vtxlist0 = []
     vtxlist1 = []
     n0 = random.random() * 10.0
     n = len(ptlist)
 
-    for i in range(1, n - 1):
-        t = i / float(n)
+    for i in range(n):
+        t = i / float(n - 1) if n > 1 else 0.5
         w = wid * fun(t)
-        w = w * (1.0 - noi) + w * noi * noise(i * 0.5, n0)
+        if noi > 0:
+            w = w * (1.0 - noi) + w * noi * noise(i * 0.5, n0)
 
-        dx1 = ptlist[i][0] - ptlist[i - 1][0]
-        dy1 = ptlist[i][1] - ptlist[i - 1][1]
-        dx2 = ptlist[i][0] - ptlist[i + 1][0]
-        dy2 = ptlist[i][1] - ptlist[i + 1][1]
+        if i == 0:
+            dx = ptlist[1][0] - ptlist[0][0]
+            dy = ptlist[1][1] - ptlist[0][1]
+            a = math.atan2(dy, dx) - math.pi * 0.5
+        elif i == n - 1:
+            dx = ptlist[-1][0] - ptlist[-2][0]
+            dy = ptlist[-1][1] - ptlist[-2][1]
+            a = math.atan2(dy, dx) - math.pi * 0.5
+        else:
+            dx1 = ptlist[i][0] - ptlist[i - 1][0]
+            dy1 = ptlist[i][1] - ptlist[i - 1][1]
+            dx2 = ptlist[i][0] - ptlist[i + 1][0]
+            dy2 = ptlist[i][1] - ptlist[i + 1][1]
 
-        a1 = math.atan2(dy1, dx1)
-        a2 = math.atan2(dy2, dx2)
-        a = (a1 + a2) * 0.5
-        if a < a2:
-            a += math.pi
+            a1 = math.atan2(dy1, dx1)
+            a2 = math.atan2(dy2, dx2)
+            a = (a1 + a2) * 0.5
+            if a < a2:
+                a += math.pi
 
         vtxlist0.append((ptlist[i][0] + w * math.cos(a), ptlist[i][1] + w * math.sin(a)))
         vtxlist1.append((ptlist[i][0] - w * math.cos(a), ptlist[i][1] - w * math.sin(a)))
 
-    ribbon = [ptlist[0]] + vtxlist0 + list(reversed(vtxlist1 + [ptlist[-1]])) + [ptlist[0]]
+    ribbon = vtxlist0 + list(reversed(vtxlist1)) + [vtxlist0[0]]
     shifted = [(p[0] + xof, p[1] + yof) for p in ribbon]
     return [PolyPrimitive(shifted, fill_col=color_tuple, stroke_col=color_tuple, stroke_weight=out)]
 

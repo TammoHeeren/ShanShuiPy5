@@ -113,8 +113,7 @@ class ShanShuiState:
         self.birds_shape: Optional[py5.PShape] = None
         
         # Shader management
-        self.shader_mode = 1  # 1: Rice Paper, 2: Continuum CRT, 3: Raw Vector
-        self.paper_shader: Optional[py5.Py5Shader] = None
+        self.shader_mode = 1  # 1: Rice Paper, 2: Continuum CRT, 3: Raw Vector        self.paper_shader: Optional[py5.Py5Shader] = None
         self.crt_shader: Optional[py5.Py5Shader] = None
 
 state = ShanShuiState()
@@ -255,11 +254,8 @@ def draw():
     # 1. Base parchment background
     py5.background(246, 243, 234)
 
-    # 2. Fixed celestial elements & calligraphy seal
+    # 2. Fixed celestial elements
     for p in state.sun_prims:
-        p.draw(py5)
-
-    for p in state.seal_prims:
         p.draw(py5)
 
     # 3. Drifting bird flock with subtle parallax
@@ -287,6 +283,10 @@ def draw():
         p.draw(py5)
 
     py5.pop_matrix()
+
+    # 5. Calligraphy Seal (stamped on top of finished landscape artwork)
+    for p in state.seal_prims:
+        p.draw(py5)
 
     # 5. Apply Real-Time GLSL Shaders on the GPU
     if state.shader_mode == 1 and state.paper_shader:
@@ -369,6 +369,7 @@ def key_pressed():
         state.target_camera_x = 0.0
         state.xmin = -CHUNK_WIDTH
         state.xmax = CHUNK_WIDTH * 3
+        state.seal_prims = calligraphy_seal(WINDOW_WIDTH - 90, 80, size=52.0, style="yin")
         plan = state.planner.plan_chunk(state.xmin, state.xmax)
         load_chunk_plan(plan)
     elif py5.key in ('s', 'S'):
