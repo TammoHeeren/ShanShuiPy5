@@ -30,7 +30,6 @@ The original 4,360+ line monolithic JavaScript file (`index.html`) has been syst
 
 ```
 ShanShuiPy5/
-├── .idea/                        # PyCharm project workspace metadata
 ├── examples/                     # Rendered artwork examples
 │   ├── shanshui_rice_paper.png   # Misty river & sampan fishermen on rice paper
 │   └── shanshui_ink_mountains.png# Mountain peaks with summit pagoda & valley vista
